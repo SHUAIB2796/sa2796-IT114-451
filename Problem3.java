@@ -18,6 +18,28 @@ public class Problem3 {
         System.out.println("Processing Array:" + Arrays.toString(arr));
         //your code should set the indexes of this array
         Object[] output = new Object[arr.length];
+
+        for (int i = 0; i<arr.length; i++) {
+            if(arr[i] instanceof Integer) {             //By utilizing Math.abs, we convert both integer and Double Values to Positive
+                output[i] = Math.abs((Integer) arr [i]);
+            } else if (arr[i] instanceof Double) {
+                output [i] = Math.abs((Double) arr[i]);
+            } else if (arr[i] instanceof String) {
+                try {
+                    Double parsedValue = Double.parseDouble((String) arr[i]);
+                    output[i] = Double.toString(Math.abs(parsedValue));       // The String values are parsed to Double and then converted to positive and back to String
+                } catch (NumberFormatException e) {
+                    output[i] = arr[i];             // In the event that parsing is unsuccessful, the original value is left in the output
+                }
+
+            } else {
+                output[i] = arr[i];
+            }
+
+        }
+
+        //UCID: sa2796, Date: 05-27-2024
+
         //hint: use the arr variable; don't diretly use the a1-a4 variables
         //TODO convert each value to positive
         //set the result to the proper index of the output array and maintain the original data type
