@@ -40,13 +40,6 @@ public class Problem3 {
 
         //UCID: sa2796, Date: 05-27-2024
 
-        //hint: use the arr variable; don't diretly use the a1-a4 variables
-        //TODO convert each value to positive
-        //set the result to the proper index of the output array and maintain the original data type
-        //hint: don't forget to handle the data types properly, the result datatype should be the same as the original datatype
-        
-        //end edit section
-
         StringBuilder sb = new StringBuilder();
         for(Object i : output){
             if(sb.length() > 0){
