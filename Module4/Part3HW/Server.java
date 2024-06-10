@@ -1,31 +1,31 @@
-package Module4.Part3;
+package Module4.Part3HW;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Server {
     private int port = 3000;
-    // connected clients
-    // Use ConcurrentHashMap for thread-safe client management
     private final ConcurrentHashMap<Long, ServerThread> connectedClients = new ConcurrentHashMap<>();
     private boolean isRunning = true;
 
+    // Game state variables
+    private boolean gameActive = false;
+    private int hiddenNumber = 0;
+    private Random random = new Random();
+
     private void start(int port) {
         this.port = port;
-        // server listening
         System.out.println("Listening on port " + this.port);
-        // Simplified client connection loop
+
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (isRunning) {
                 System.out.println("Waiting for next client");
-                Socket incomingClient = serverSocket.accept(); // blocking action, waits for a client connection
+                Socket incomingClient = serverSocket.accept();
                 System.out.println("Client connected");
-                // wrap socket in a ServerThread, pass a callback to notify the Server they're initialized
                 ServerThread sClient = new ServerThread(incomingClient, this, this::onClientInitialized);
-                // start the thread (typically an external entity manages the lifecycle and we
-                // don't have the thread start itself)
                 sClient.start();
             }
         } catch (IOException e) {
@@ -35,61 +35,27 @@ public class Server {
             System.out.println("Closing server socket");
         }
     }
-    /**
-     * Callback passed to ServerThread to inform Server they're ready to receive data
-     * @param sClient
-     */
+
     private void onClientInitialized(ServerThread sClient) {
-        // add to connected clients list
         connectedClients.put(sClient.getClientId(), sClient);
         relay(String.format("*User[%s] connected*", sClient.getClientId()), null);
     }
-    /**
-     * Takes a ServerThread and removes them from the Server
-     * Adding the synchronized keyword ensures that only one thread can execute
-     * these methods at a time,
-     * preventing concurrent modification issues and ensuring thread safety
-     * 
-     * @param client
-     */
+
     protected synchronized void disconnect(ServerThread client) {
         long id = client.getClientId();
         client.disconnect();
         connectedClients.remove(id);
-        // Improved logging with user ID
         relay("User[" + id + "] disconnected", null);
     }
 
-    /**
-     * Relays the message from the sender to all connectedClients
-     * Internally calls processCommand and evaluates as necessary.
-     * Note: Clients that fail to receive a message get removed from
-     * connectedClients.
-     * Adding the synchronized keyword ensures that only one thread can execute
-     * these methods at a time,
-     * preventing concurrent modification issues and ensuring thread safety
-     * 
-     * @param message
-     * @param sender ServerThread (client) sending the message or null if it's a server-generated message
-     */
     protected synchronized void relay(String message, ServerThread sender) {
         if (sender != null && processCommand(message, sender)) {
-
             return;
         }
-        // let's temporarily use the thread id as the client identifier to
-        // show in all client's chat. This isn't good practice since it's subject to
-        // change as clients connect/disconnect
-        // Note: any desired changes to the message must be done before this line
+
         String senderString = sender == null ? "Server" : String.format("User[%s]", sender.getClientId());
         final String formattedMessage = String.format("%s: %s", senderString, message);
-        // end temp identifier
 
-        // loop over clients and send out the message; remove client if message failed
-        // to be sent
-        // Note: this uses a lambda expression for each item in the values() collection,
-        // it's one way we can safely remove items during iteration
-        
         connectedClients.values().removeIf(client -> {
             boolean failedToSend = !client.send(formattedMessage);
             if (failedToSend) {
@@ -100,29 +66,76 @@ public class Server {
         });
     }
 
-    /**
-     * Attempts to see if the message is a command and process its action
-     * 
-     * @param message
-     * @param sender
-     * @return true if it was a command, false otherwise
-     */
     private boolean processCommand(String message, ServerThread sender) {
-        if(sender == null){
+        if (sender == null) {
             return false;
         }
         System.out.println("Checking command: " + message);
-        // disconnect
+
         if ("/disconnect".equalsIgnoreCase(message)) {
             ServerThread removedClient = connectedClients.get(sender.getClientId());
             if (removedClient != null) {
                 disconnect(removedClient);
             }
             return true;
+
+        } else if ("/start".equalsIgnoreCase(message)) {
+            startGame();
+            relay("The game has started! Start guessing!", null);
+            return true;
+
+        } else if ("/stop".equalsIgnoreCase(message)) {
+            stopGame();
+            relay("The game has been stopped.", null);
+            return true;
+
+        } else if (message.startsWith("/guess ")) {
+            if (gameActive) {
+                try {
+                    int guess = Integer.parseInt(message.split(" ")[1]);
+                    handleGuess(sender, guess);
+                } catch (NumberFormatException e) {
+                    sender.send("Wrong guess. Please type a number.");
+                }
+
+            } else {
+                sender.send("Game not active. Please start a new game to guess.");
+            }
+
+            return true;
         }
-        // add more "else if" as needed
+        else if ("/flip".equalsIgnoreCase(message) || "/toss".equalsIgnoreCase(message) || "/coin".equalsIgnoreCase(message)) {     //UCID: sa2796, Date: 6-10-24
+            handleCoinToss(sender);
+            return true;
+        }
+
+
         return false;
     }
+
+    private void startGame() {
+        hiddenNumber = random.nextInt(100) + 1;
+        gameActive = true;
+    }
+
+    private void stopGame() {
+        gameActive = false;
+        hiddenNumber = 0;
+    }
+
+    private void handleGuess(ServerThread sender, int guess) {
+        if (guess == hiddenNumber) {
+            relay(String.format("Player[%s] guessed %d and it was correct!", sender.getClientId(), guess), null);
+            stopGame();
+        } else {
+            relay(String.format("Player[%s] guessed %d but it was incorrect.", sender.getClientId(), guess), null);
+        }
+    }
+
+    private void handleCoinToss(ServerThread sender) {
+        String result = random.nextBoolean() ? "heads" : "tails";
+        relay(String.format("User[%s] flipped a coin and got %s.", sender.getClientId(), result), null);
+}
 
     public static void main(String[] args) {
         System.out.println("Server Starting");
@@ -131,8 +144,7 @@ public class Server {
         try {
             port = Integer.parseInt(args[0]);
         } catch (Exception e) {
-            // can ignore, will either be index out of bounds or type mismatch
-            // will default to the defined value prior to the try/catch
+
         }
         server.start(port);
         System.out.println("Server Stopped");
