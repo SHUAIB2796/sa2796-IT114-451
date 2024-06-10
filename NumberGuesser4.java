@@ -60,14 +60,14 @@ public class NumberGuesser4 {
                     temp = strToNum(data[2]);
                     if (temp > -1) {
                         this.number = temp; // UCID: sa2796, Date: 6-3-24, check and set the 'number' variable
-                        pickNewRandom = false;
+                        pickNewRandom = false; 
                     }
                     temp = strToNum(data[3]);
                     if (temp > -1) {
-                        this.maxLevel = temp; // UCID: sa2796, Date: 6-3-24, check and set the 'maxLevel' variable
-                    }
+                        this.maxLevel = temp; // UCID: sa2796, Date: 6-3-24, check and set the 'maxLevel' variable  
+                    } 
                 }
-                lineNumber++;
+                lineNumber++;  
             }
         } catch (FileNotFoundException e) {// specific exception
             e.printStackTrace();
@@ -86,7 +86,7 @@ public class NumberGuesser4 {
      * @param level (level to use as upper bounds)
      * @return number between bounds
      */
-    private void generateNewNumber(int level) {
+    private void generateNewNumber(int level) { 
         int range = 10 + ((level - 1) * 5);
         System.out.println("Welcome to level " + level);
         System.out.println(
