@@ -289,7 +289,7 @@ public enum Client {
     /**
      * Listens for keyboard input from the user
      */
-    private void listenToInput() {
+    private void listenToInput() {                 //UCID: sa2796   Date: 6-17-24
         try (Scanner si = new Scanner(System.in)) {
             System.out.println("Waiting for input"); // moved here to avoid console spam
             while (isRunning) { // Run until isRunning is false
@@ -323,7 +323,7 @@ public enum Client {
     /**
      * Closes the server connection and associated resources
      */
-    private void closeServerConnection() {
+    private void closeServerConnection() {  ////UCID: sa2796   Date: 6-17-24
         myData.reset();
         knownClients.clear();
         try {
