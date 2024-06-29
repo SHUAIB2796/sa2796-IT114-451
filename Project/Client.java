@@ -119,7 +119,7 @@ public enum Client {
                 return true;
             }
             // replaces multiple spaces with a single space
-            // splits on the space after connect (gives us host and port)
+            // splits on the space after connect (gives us host and port)                                                           //UCID:sa2796  Date: 6-23-24
             // splits on : to get host as index 0 and port as index 1
             String[] parts = text.trim().replaceAll(" +", " ").split(" ")[1].split(":");
             connect(parts[0].trim(), Integer.parseInt(parts[1].trim()));
@@ -258,9 +258,9 @@ public enum Client {
     }
 
     /**
-     * Listens for messages from the server
+     * Listens for messages from the server 
      */
-    private void listenToServer() {
+    private void listenToServer() {   //UCID: sa2796 Date: 6-23-24
         try {
             while (isRunning && isConnected()) {
                 Payload fromServer = (Payload) in.readObject(); // blocking read
@@ -289,7 +289,7 @@ public enum Client {
     /**
      * Listens for keyboard input from the user
      */
-    private void listenToInput() {                 //UCID: sa2796   Date: 6-17-24
+    private void listenToInput() {                 //UCID: sa2796   Date: 6-23-24
         try (Scanner si = new Scanner(System.in)) {
             System.out.println("Waiting for input"); // moved here to avoid console spam
             while (isRunning) { // Run until isRunning is false
@@ -313,7 +313,7 @@ public enum Client {
     /**
      * Closes the client connection and associated resources
      */
-    private void close() {
+    private void close() {      //UCID:sa2796  Date: 6-23-24
         isRunning = false;
         closeServerConnection();
         System.out.println("Client terminated");
@@ -323,7 +323,7 @@ public enum Client {
     /**
      * Closes the server connection and associated resources
      */
-    private void closeServerConnection() {  ////UCID: sa2796   Date: 6-17-24
+    private void closeServerConnection() {  ////UCID: sa2796   Date: 6-23-24
         myData.reset();
         knownClients.clear();
         try {
