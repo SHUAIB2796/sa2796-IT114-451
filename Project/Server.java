@@ -15,7 +15,7 @@ public enum Server {
     private long nextClientId = 1;
 
     private Server(){
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {    //UCID: sa2796  Date:6-23-24
             System.out.println("JVM is shutting down. Perform cleanup tasks.");
             shutdown();
         }));
