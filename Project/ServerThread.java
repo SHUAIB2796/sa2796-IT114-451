@@ -83,7 +83,7 @@ public class ServerThread extends BaseServerThread {
     }
     // handle received message from the Client
     @Override
-    protected void processPayload(Payload payload) {   //UCID:sa2796 Date: 6-23-24
+    protected void processPayload(Payload payload) {   //UCID:sa2796 Date: 6-23-24 Milestone 1
         try {
             switch (payload.getPayloadType()) {
                 case CLIENT_CONNECT:
@@ -101,6 +101,19 @@ public class ServerThread extends BaseServerThread {
                     break;
                 case DISCONNECT:
                     currentRoom.disconnect(this);
+                    break;          
+                case ROLL:                                                          //UCID: sa2796 Date: 7-3-24 Milestone 2
+                    if (payload instanceof RollPayload) {
+                        RollPayload rollPayload = (RollPayload) payload;
+                        System.out.println("Received RollPayload from client");
+                        currentRoom.handleRoll(this, rollPayload);
+                    }
+                case FLIP:
+                    if (payload instanceof FlipPayload) {
+                        FlipPayload flipPayload = (FlipPayload) payload;
+                        System.out.println("Received FlipPayload from client: " + flipPayload);
+                        currentRoom.handleFlip(this, flipPayload);
+                    }
                     break;
                 default:
                     break;
