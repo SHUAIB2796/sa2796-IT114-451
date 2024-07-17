@@ -1,4 +1,4 @@
-package Project;
+package Project.Common;
 
 import java.io.Serializable;
 
@@ -7,6 +7,18 @@ public class Payload implements Serializable {
     private PayloadType payloadType;
     private long clientId;
     private String message;
+    private String targetUsername;
+    private boolean isPrivate;
+
+     // Getter and setter for targetUsername
+     public String getTargetUsername() {
+        return targetUsername;
+    }
+
+    public void setTargetUsername(String targetUsername) {
+        this.targetUsername = targetUsername;
+    }
+
 
     
 
@@ -43,6 +55,15 @@ public class Payload implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
+    public void setPrivate(boolean isPrivate) {
+        this.isPrivate = isPrivate;
+    }
+
 
 
 

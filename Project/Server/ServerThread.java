@@ -1,8 +1,20 @@
-package Project;
+package Project.Server;
 
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
+
+import Project.Common.PayloadType;
+import Project.Common.RoomResultsPayload;
+import Project.Common.Payload;
+import Project.Common.RollPayload;
+import Project.Common.FlipPayload;
+
+import Project.Common.ConnectionPayload;
+import Project.Common.LoggerUtil;
 
 /**
  * A server-side representation of a single client.
@@ -41,7 +53,8 @@ public class ServerThread extends BaseServerThread {
         this.clientName = name;
         onInitialized();
     }
-    public String getClientName(){
+
+    public String getClientName() {
         return clientName;
     }
 
@@ -67,7 +80,7 @@ public class ServerThread extends BaseServerThread {
 
     @Override
     protected void info(String message) {
-        System.out.println(String.format("ServerThread[%s(%s)]: %s", getClientName(), getClientId(), message));
+        LoggerUtil.INSTANCE.info(String.format("ServerThread[%s(%s)]: %s", getClientName(), getClientId(), message));
     }
 
     @Override
@@ -75,15 +88,16 @@ public class ServerThread extends BaseServerThread {
         currentRoom = null;
         super.cleanup();
     }
-    
+
     @Override
-    protected void disconnect(){
-        //sendDisconnect(clientId, clientName);
+    protected void disconnect() {
+        // sendDisconnect(clientId, clientName);
         super.disconnect();
     }
+
     // handle received message from the Client
     @Override
-    protected void processPayload(Payload payload) {   //UCID:sa2796 Date: 6-23-24 Milestone 1
+    protected void processPayload(Payload payload) {
         try {
             switch (payload.getPayloadType()) {
                 case CLIENT_CONNECT:
@@ -91,7 +105,11 @@ public class ServerThread extends BaseServerThread {
                     setClientName(cp.getClientName());
                     break;
                 case MESSAGE:
+                if (payload.isPrivate()) {
+                    currentRoom.handlePrivateMessage(this, payload);
+                } else {
                     currentRoom.sendMessage(this, payload.getMessage());
+                }
                     break;
                 case ROOM_CREATE:
                     currentRoom.handleCreateRoom(this, payload.getMessage());
@@ -99,34 +117,66 @@ public class ServerThread extends BaseServerThread {
                 case ROOM_JOIN:
                     currentRoom.handleJoinRoom(this, payload.getMessage());
                     break;
+                case ROOM_LIST:
+                    currentRoom.handleListRooms(this, payload.getMessage());
+                    break;
                 case DISCONNECT:
                     currentRoom.disconnect(this);
-                    break;          
-                case ROLL:                                                          //UCID: sa2796 Date: 7-3-24 Milestone 2
+                    break;
+                case ROLL: // Case for 'ROLL' payload type                                                         
                     if (payload instanceof RollPayload) {
                         RollPayload rollPayload = (RollPayload) payload;
-                        System.out.println("Received RollPayload from client");
-                        currentRoom.handleRoll(this, rollPayload);
+                        System.out.println("Received RollPayload"); // Message to the console indicating the RollPayload was received
+                        currentRoom.handleRoll(this, rollPayload); // Handles the roll command in the same room the client sent the payload from
                     }
-                case FLIP:
+                    break;
+                case FLIP: // Case for 'FLIP' payload type
                     if (payload instanceof FlipPayload) {
                         FlipPayload flipPayload = (FlipPayload) payload;
-                        System.out.println("Received FlipPayload from client: " + flipPayload);
-                        currentRoom.handleFlip(this, flipPayload);
+                        System.out.println("Received FlipPayload: " + flipPayload); // Message to the console indicating the FlipPayload was received
+                        currentRoom.handleFlip(this, flipPayload); // Handles the roll command in the same room the client sent the payload from
                     }
+                    break;
+                case MUTE:
+                    currentRoom.handleMute(this, payload);
+                    break;
+                case UNMUTE:
+                    currentRoom.handleUnmute(this, payload);
                     break;
                 default:
                     break;
             }
         } catch (Exception e) {
-            System.out.println("Could not process Payload: " + payload);
-            e.printStackTrace();
+            LoggerUtil.INSTANCE.severe("Could not process Payload: " + payload,e);
+        
         }
     }
 
+    private Set<Long> muteList = new HashSet<>();
+
+    public void addToMuteList(long clientId) {
+        muteList.add(clientId); 
+    }
+
+    public void removeFromMuteList(long clientId) {
+        muteList.remove(clientId);
+    }
+
+    public boolean isMuted(long clientId) {
+        return muteList.contains(clientId);
+    }
+
+    
+
     // send methods to pass data back to the Client
 
-    public boolean sendClientSync(long clientId, String clientName){
+    public boolean sendRooms(List<String> rooms) {
+        RoomResultsPayload rrp = new RoomResultsPayload();
+        rrp.setRooms(rooms);
+        return send(rrp);
+    }
+
+    public boolean sendClientSync(long clientId, String clientName) {
         ConnectionPayload cp = new ConnectionPayload();
         cp.setClientId(clientId);
         cp.setClientName(clientName);
@@ -142,7 +192,7 @@ public class ServerThread extends BaseServerThread {
      * @return @see {@link #send(Payload)}
      */
     public boolean sendMessage(String message) {
-        return sendMessage(ServerThread.DEFAULT_CLIENT_ID, message);
+        return sendMessage(ServerThread.DEFAULT_CLIENT_ID, message, false);
     }
 
     /**
@@ -152,11 +202,12 @@ public class ServerThread extends BaseServerThread {
      * @param message
      * @return @see {@link #send(Payload)}
      */
-    public boolean sendMessage(long senderId, String message) {
+    public boolean sendMessage(long senderId, String message, boolean isPrivate) {
         Payload p = new Payload();
         p.setClientId(senderId);
         p.setMessage(message);
         p.setPayloadType(PayloadType.MESSAGE);
+        p.setPrivate(isPrivate);
         return send(p);
     }
 
@@ -172,7 +223,7 @@ public class ServerThread extends BaseServerThread {
     public boolean sendRoomAction(long clientId, String clientName, String room, boolean isJoin) {
         ConnectionPayload cp = new ConnectionPayload();
         cp.setPayloadType(PayloadType.ROOM_JOIN);
-        cp.setConnect(isJoin); //<-- determine if join or leave
+        cp.setConnect(isJoin); // <-- determine if join or leave
         cp.setMessage(room);
         cp.setClientId(clientId);
         cp.setClientName(clientName);
