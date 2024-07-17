@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
 
+
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -32,6 +33,7 @@ import javax.swing.border.EmptyBorder;
 import Project.Client.CardView;
 import Project.Client.Client;
 import Project.Client.Interfaces.ICardControls;
+
 import Project.Common.LoggerUtil;
 
 /**
@@ -123,7 +125,7 @@ public class ChatPanel extends JPanel {
                         Client.INSTANCE.sendMessage(text);
                         textValue.setText(""); // Clear the original text
                     }
-                } catch (NullPointerException | IOException e) {
+                } catch (Exception e) {
                     LoggerUtil.INSTANCE.severe("Error sending message", e);
                 }
             });
@@ -201,7 +203,12 @@ public class ChatPanel extends JPanel {
      */
     public void addText(String text) {
         SwingUtilities.invokeLater(() -> {
+            System.out.println("Text added to chat panel: " + text);
             JEditorPane textContainer = new JEditorPane("text/plain", text);
+            
+            textContainer.setContentType("text/html"); // Set content type to HTML
+            textContainer.setText(text);
+
             textContainer.setEditable(false);
             textContainer.setBorder(BorderFactory.createEmptyBorder());
 
@@ -227,6 +234,8 @@ public class ChatPanel extends JPanel {
             gbc.fill = GridBagConstraints.HORIZONTAL; // Fill horizontally
             gbc.insets = new Insets(0, 0, 5, 0); // Add spacing between messages
 
+          
+
             chatArea.add(textContainer, gbc);
             chatArea.revalidate();
             chatArea.repaint();
@@ -238,4 +247,7 @@ public class ChatPanel extends JPanel {
             });
         });
     }
+
 }
+
+

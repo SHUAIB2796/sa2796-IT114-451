@@ -97,6 +97,7 @@ public class UserListPanel extends JPanel {
                 LoggerUtil.INSTANCE.warning("User already in the list: " + clientName);
                 return; // User already in the list
             }
+            System.out.println("Adding user to list in UserListPanel: " + clientName);
 
             LoggerUtil.INSTANCE.info("Adding user to list: " + clientName);
 

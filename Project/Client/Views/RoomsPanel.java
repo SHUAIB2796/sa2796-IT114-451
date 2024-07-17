@@ -6,7 +6,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +25,7 @@ import javax.swing.border.LineBorder;
 import Project.Client.CardView;
 import Project.Client.Client;
 import Project.Client.Interfaces.ICardControls;
+
 import Project.Common.LoggerUtil;
 
 /**
@@ -80,7 +81,7 @@ public class RoomsPanel extends JPanel {
                     } else {
                         message.setText("Can't search with an empty query");
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LoggerUtil.INSTANCE.warning("Error sending request: " + e.getMessage(), e);
                     message.setText("Error sending request: " + e.getMessage());
                 }
@@ -98,7 +99,7 @@ public class RoomsPanel extends JPanel {
                     } else {
                         message.setText("Can't create a room without a name");
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LoggerUtil.INSTANCE.warning("Error sending request: " + e.getMessage(), e);
                     message.setText("Error sending request: " + e.getMessage());
                 }
@@ -118,7 +119,7 @@ public class RoomsPanel extends JPanel {
                     }
                 } catch (NullPointerException ne) {
                     message.setText("Not connected");
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LoggerUtil.INSTANCE.warning("Not connected", e);
                     message.setText("Error sending request: " + e.getMessage());
                 }
@@ -230,7 +231,7 @@ public class RoomsPanel extends JPanel {
         SwingUtilities.invokeLater(() -> {
             try {
                 Client.INSTANCE.sendJoinRoom(room);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LoggerUtil.INSTANCE.severe("Error joining room: " + e.getMessage(), e);
             }
         });

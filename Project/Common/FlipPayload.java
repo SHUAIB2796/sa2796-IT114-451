@@ -1,4 +1,5 @@
-package Project;
+package Project.Common;
+
 
 public class FlipPayload extends Payload {
     public FlipPayload() {
