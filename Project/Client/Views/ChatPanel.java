@@ -13,7 +13,7 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
+
 
 
 import javax.swing.BorderFactory;
@@ -186,7 +186,7 @@ public class ChatPanel extends JPanel {
      * @param clientId The ID of the client to be removed.
      */
     public void removeUserListItem(long clientId) {
-        SwingUtilities.invokeLater(() -> userListPanel.removeUserListItem(clientId));
+        SwingUtilities.invokeLater(() -> userListPanel.removeUserListItem(clientId));        //UCID: sa2796 Date: 7-16-24
     }
 
     /**
@@ -201,19 +201,19 @@ public class ChatPanel extends JPanel {
      * 
      * @param text The text of the message.
      */
-    public void addText(String text) {
+    public void addText(String text) { 
         SwingUtilities.invokeLater(() -> {
             System.out.println("Text added to chat panel: " + text);
             JEditorPane textContainer = new JEditorPane("text/plain", text);
             
-            textContainer.setContentType("text/html"); // Set content type to HTML
+            textContainer.setContentType("text/html"); //UCID: sa2796 Date: 7-16-24
             textContainer.setText(text);
 
             textContainer.setEditable(false);
             textContainer.setBorder(BorderFactory.createEmptyBorder());
 
             // Account for the width of the vertical scrollbar
-            JScrollPane parentScrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, chatArea);
+            JScrollPane parentScrollPane = (JScrollPane) SwingUtilities.getAncestorOfClass(JScrollPane.class, chatArea);        //UCID: sa2796 Date: 7-16-24
             int scrollBarWidth = parentScrollPane.getVerticalScrollBar().getPreferredSize().width;
 
             // Adjust the width of the text container
@@ -240,7 +240,7 @@ public class ChatPanel extends JPanel {
             chatArea.revalidate();
             chatArea.repaint();
 
-            // Scroll down on new message
+            // Scroll down on new message                                                        //UCID: sa2796 Date: 7-16-24
             SwingUtilities.invokeLater(() -> {
                 JScrollBar vertical = parentScrollPane.getVerticalScrollBar();
                 vertical.setValue(vertical.getMaximum());
