@@ -1433,3 +1433,53 @@
 [34m>[0m ServerThread[Shuaib(1)]: ServerThread cleanup() start
 07/16/2024 11:19:36 [Project.Server.ServerThread] ([32mINFO[0m):
 [34m>[0m ServerThread[Shuaib(1)]: ServerThread cleanup() end
+07/17/2024 17:03:34 [Project.Server.Server] ([32mINFO[0m):
+[34m>[0m Server Starting
+07/17/2024 17:03:34 [Project.Server.Server] ([32mINFO[0m):
+[34m>[0m Listening on port 3000
+07/17/2024 17:03:34 [Project.Server.Room] ([32mINFO[0m):
+[34m>[0m Room[lobby]: created
+07/17/2024 17:03:34 [Project.Server.Server] ([32mINFO[0m):
+[34m>[0m Created new Room lobby
+07/17/2024 17:03:34 [Project.Server.Server] ([32mINFO[0m):
+[34m>[0m Waiting for next client
+07/17/2024 17:03:48 [Project.Server.Server] ([32mINFO[0m):
+[34m>[0m Client connected
+07/17/2024 17:03:48 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[null(0)]: ServerThread created
+07/17/2024 17:03:48 [Project.Server.Server] ([32mINFO[0m):
+[34m>[0m Waiting for next client
+07/17/2024 17:03:48 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[null(-1)]: Thread starting
+07/17/2024 17:03:48 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[null(-1)]: Received from my client: Payload[CLIENT_CONNECT] Client Id [0] Message: [null] Client Name [vdvs] Status [disconnect]
+07/17/2024 17:03:48 [Project.Server.Server] ([32mINFO[0m):
+[34m>[0m Server: *vdvs[1] initialized*
+07/17/2024 17:03:48 [Project.Server.Room] ([32mINFO[0m):
+[34m>[0m Room[lobby]: sending room status to 1 recipients
+07/17/2024 17:03:48 [Project.Server.Room] ([32mINFO[0m):
+[34m>[0m Room[lobby]: vdvs[1] joined the Room[lobby]
+07/17/2024 17:04:04 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[vdvs(1)]: Received from my client: Payload[MESSAGE] Client Id [0] Message: [hello]
+07/17/2024 17:04:04 [Project.Server.Room] ([32mINFO[0m):
+[34m>[0m Room[lobby]: sending message to lobby recipients: 1
+07/17/2024 17:04:13 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[vdvs(1)]: Received from my client: Payload[DISCONNECT] Client Id [0] Message: [null]
+07/17/2024 17:04:13 [Project.Server.Room] ([32mINFO[0m):
+[34m>[0m Room[lobby]: sending disconnect status to 1 recipients
+07/17/2024 17:04:13 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[vdvs(1)]: Thread being disconnected by server
+07/17/2024 17:04:13 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[vdvs(1)]: ServerThread cleanup() start
+07/17/2024 17:04:13 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[vdvs(1)]: ServerThread cleanup() end
+07/17/2024 17:04:13 [Project.Server.Room] ([34mFINE[0m):
+[34m>[0m Clients remaining in Room: 0
+07/17/2024 17:04:13 [Project.Server.Room] ([32mINFO[0m):
+[34m>[0m Room[lobby]: vdvs[1] disconnected
+07/17/2024 17:04:13 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[vdvs(1)]: Exited thread loop. Cleaning up connection
+07/17/2024 17:04:13 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[vdvs(1)]: ServerThread cleanup() start
+07/17/2024 17:04:13 [Project.Server.ServerThread] ([32mINFO[0m):
+[34m>[0m ServerThread[vdvs(1)]: ServerThread cleanup() end

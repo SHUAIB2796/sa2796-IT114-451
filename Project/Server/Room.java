@@ -42,7 +42,7 @@ public class Room implements AutoCloseable{
     }
 
     
-    private String processTextEffects(String message) {             //UCID: sa2796 7-3-24
+    private String processTextEffects(String message) {             //UCID: sa2796 7-16-24
         message = message.replaceAll("#r(.+?)r#", "<span style='color:red;'>$1</span>"); // #r[text]r# for red text
         message = message.replaceAll("#g(.+?)g#", "<span style='color:green;'>$1</span>"); // #g[text]g# for green text
         message = message.replaceAll("#b(.+?)b#", "<span style='color:blue;'>$1</span>"); // #b[text]b# for blue text       
@@ -61,20 +61,12 @@ public class Room implements AutoCloseable{
 
     private String processBold(String message) {
         System.out.println("Source Message (Bold): " + message);
-        // Print the original message for debugging
-
-
-        // Define the regular expression pattern for detecting bold formatting
+       
         Pattern pattern = Pattern.compile(BOLD_REGEX);
-        // Create a matcher object to find matches in the message
         Matcher matcher = pattern.matcher(message);
 
-
-        // Iterate through all matches in the message
         while (matcher.find()) {
-            // Create bold-formatted text using the matched content
             String boldText = "<b>" + matcher.group(1) + "</b>";
-            // Replace the original matched content with the formatted text
             message = message.replace(matcher.group(0), boldText);
         }
 
@@ -357,7 +349,7 @@ public class Room implements AutoCloseable{
         info(String.format("sending message to %s recipients: %s", getName(), clientsInRoom.size(), messageToSend[0]));
         clientsInRoom.values().removeIf(client -> {
             if (client.isMuted(senderId)) {
-                info(String.format("Message from %s to %s was skipped due to mute.", sender.getClientName(), client.getClientName()));
+                info(String.format("Message from %s to %s was skipped due to mute.", sender.getClientName(), client.getClientName()));     //UCID: sa2796 Date: 7-16-24
                 return false;
             }
 
@@ -378,7 +370,7 @@ public class Room implements AutoCloseable{
         String targetUsername = payload.getTargetUsername();
         String message = payload.getMessage();
 
-        String formattedMessage = processTextEffects(message);
+        String formattedMessage = processTextEffects(message);                  //UCID: sa2796 Date: 7-16-24
 
         ServerThread targetClient = clientsInRoom.values().stream()
             .filter(client -> client.getClientName().equalsIgnoreCase(targetUsername))
@@ -395,36 +387,27 @@ public class Room implements AutoCloseable{
     }
 
     
-    //Handle Flip Method                                                                                    //UCID: sa2796 7-3-24
+                                                                             //UCID: sa2796 Date: 7-16-24
     protected synchronized void handleFlip(ServerThread sender, FlipPayload flipPayload) {
-        // Determines result of flip, either heads or tails
         String result = random.nextBoolean() ? "heads" : "tails";
-        // Writes a message to the console which displays the result of the flip
         String message = String.format("%s flipped a coin and got %s", sender.getClientName(), result);
-        // Message sent to clients connected to room
         sendMessage(null, message);
     }
     
 
     
-    //Handle Roll Method
-    protected synchronized void handleRoll(ServerThread sender, RollPayload rollPayload) {              //UCID: sa2796 7-3-24
-        //Gets number of dice from payload
+  
+    protected synchronized void handleRoll(ServerThread sender, RollPayload rollPayload) {              //UCID: sa2796 Date: 7-16-24
         int Dicenumber = rollPayload.getDicenumber();
-        //Gets number of sides of each die from payload
         int Sidesnumber = rollPayload.getSidesnumber();
-        // Writes a message to the console indicating the result of the roll
         StringBuilder resultMessage = new StringBuilder(String.format("%s rolled %dd%d and got", sender.getClientName(), Dicenumber, Sidesnumber));      
         int total = 0;
-        //for-loop iterates through the number of dice specified by the user and the result is appended to the total
         for (int i = 0; i < Dicenumber; i++) {
-            // Adds result from each die of the side landed on
             int rollResult = random.nextInt(Sidesnumber) + 1;
-            //Roll result added to total
             total += rollResult;
             resultMessage.append(" ").append(rollResult);
         }
-        // Total is added to the message which is written to the console
+
         resultMessage.append(" (total: ").append(total).append(")");
         sendMessage(null, resultMessage.toString());
     }
@@ -466,7 +449,7 @@ public class Room implements AutoCloseable{
             sender.addToMuteList(targetClient.getClientId());
             sender.sendMessage(sender.getClientId(), "You have muted " + targetUsername, false);
         } else {
-            sender.sendMessage(sender.getClientId(), "User " + targetUsername + " not found.", false);
+            sender.sendMessage(sender.getClientId(), "User " + targetUsername + " not found.", false);      //UCID: sa2796 Date: 7-16-24
         }
     }
 
