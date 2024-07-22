@@ -800,3 +800,95 @@
 [34m>[0m Received Payload: Payload[MESSAGE] Client Id [1] Message: [so <b>cool</b>]
 07/16/2024 11:19:36 [Project.Client.Client] ([32mINFO[0m):
 [34m>[0m Received Payload: Payload[DISCONNECT] Client Id [1] Message: [null] Client Name [Shuaib] Status [disconnect]
+07/17/2024 17:03:45 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Client Created
+07/17/2024 17:03:45 [Project.Client.ClientUI] ([34mFINE[0m):
+[34m>[0m Current panel: USER_INFO
+07/17/2024 17:03:48 [Project.Client.Views.UserDetailsPanel] ([32mINFO[0m):
+[34m>[0m Chosen username: vdvs
+07/17/2024 17:03:48 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Client connected
+07/17/2024 17:03:48 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Received Payload: Payload[CLIENT_ID] Client Id [1] Message: [null] Client Name [vdvs] Status [connect]
+07/17/2024 17:03:48 [Project.Client.ClientUI] ([34mFINE[0m):
+[34m>[0m Current panel: CHAT
+07/17/2024 17:03:48 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Received Payload: Payload[ROOM_JOIN] Client Id [1] Message: [lobby] Client Name [vdvs] Status [connect]
+07/17/2024 17:03:48 [Project.Client.ClientUI] ([32mINFO[0m):
+[34m>[0m Current card: CHAT
+07/17/2024 17:03:48 [Project.Client.Views.UserListPanel] ([32mINFO[0m):
+[34m>[0m Adding user to list: vdvs (1)
+07/17/2024 17:04:04 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Received Payload: Payload[MESSAGE] Client Id [1] Message: [hello]
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Received Payload: Payload[DISCONNECT] Client Id [1] Message: [null] Client Name [vdvs] Status [disconnect]
+07/17/2024 17:04:13 [Project.Client.ClientUI] ([32mINFO[0m):
+[34m>[0m I disconnected
+07/17/2024 17:04:13 [Project.Client.ClientUI] ([34mFINE[0m):
+[34m>[0m Current panel: USER_INFO
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Closing output stream
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Closing input stream
+07/17/2024 17:04:13 [Project.Client.Views.UserListPanel] ([32mINFO[0m):
+[34m>[0m Removing user list item for id 1
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Closing connection
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Closed socket
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Closing output stream
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Closing input stream
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Closing connection
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m Closed socket
+07/17/2024 17:04:13 [Project.Client.Client] ([32mINFO[0m):
+[34m>[0m listenToServer thread stopped
+07/17/2024 17:04:17 [Project.Client.Client] ([31mSEVERE[0m):
+[34m>[0m Socket send exception
+	at java.base/sun.nio.ch.NioSocketImpl.ensureOpenAndConnected(NioSocketImpl.java:163)
+	at java.base/sun.nio.ch.NioSocketImpl.beginWrite(NioSocketImpl.java:362)
+	at java.base/sun.nio.ch.NioSocketImpl.implWrite(NioSocketImpl.java:407)
+	at java.base/sun.nio.ch.NioSocketImpl.write(NioSocketImpl.java:440)
+	at java.base/sun.nio.ch.NioSocketImpl$2.write(NioSocketImpl.java:819)
+	at java.base/java.net.Socket$SocketOutputStream.write(Socket.java:1195)
+	at java.base/java.io.ObjectOutputStream$BlockDataOutputStream.drain(ObjectOutputStream.java:1899)
+	at java.base/java.io.ObjectOutputStream$BlockDataOutputStream.setBlockDataMode(ObjectOutputStream.java:1808)
+	at java.base/java.io.ObjectOutputStream.writeNonProxyDesc(ObjectOutputStream.java:1302)
+	at java.base/java.io.ObjectOutputStream.writeClassDesc(ObjectOutputStream.java:1247)
+	at java.base/java.io.ObjectOutputStream.writeOrdinaryObject(ObjectOutputStream.java:1443)
+	at java.base/java.io.ObjectOutputStream.writeObject0(ObjectOutputStream.java:1194)
+	at java.base/java.io.ObjectOutputStream.writeFatalException(ObjectOutputStream.java:1615)
+	at java.base/java.io.ObjectOutputStream.writeObject(ObjectOutputStream.java:361)
+	at Project.Client.Client.send(Client.java:433)
+	at Project.Client.Client.sendDisconnect(Client.java:389)
+	at Project.Client.ClientUI$2.windowClosing(ClientUI.java:124)
+	at java.desktop/java.awt.Window.processWindowEvent(Window.java:2085)
+	at java.desktop/javax.swing.JFrame.processWindowEvent(JFrame.java:298)
+	at java.desktop/java.awt.Window.processEvent(Window.java:2044)
+	at java.desktop/java.awt.Component.dispatchEventImpl(Component.java:4996)
+	at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2324)
+	at java.desktop/java.awt.Window.dispatchEventImpl(Window.java:2780)
+	at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+	at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:775)
+	at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+	at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:98)
+	at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:747)
+	at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:745)
+	at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+	at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+	at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:744)
+	at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+	at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+	at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+	at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+
+07/17/2024 17:04:17 [Project.Client.ClientUI$2] ([31mSEVERE[0m):
+[34m>[0m Error during disconnect: Socket closed
