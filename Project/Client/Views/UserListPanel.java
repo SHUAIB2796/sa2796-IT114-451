@@ -1,7 +1,9 @@
 package Project.Client.Views;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -11,7 +13,9 @@ import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
 import java.util.HashMap;
 
+
 import javax.swing.Box;
+
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -27,6 +31,7 @@ public class UserListPanel extends JPanel {
     private JPanel userListArea;
     private GridBagConstraints lastConstraints; // Keep track of the last constraints for the glue
     private HashMap<Long, UserListItem> userItemsMap; // Maintain a map of client IDs to UserListItems
+    private long highlightedUserId = -1; //added 7-22-24
 
     /**
      * Constructor to create the UserListPanel UI.
@@ -171,6 +176,39 @@ public class UserListPanel extends JPanel {
             LoggerUtil.INSTANCE.info("Clearing user list");
             userItemsMap.clear(); // Clear the map
             userListArea.removeAll();
+            userListArea.revalidate();
+            userListArea.repaint();
+        });
+    }
+    //added 7-22-24
+    public void updateUserStatus(long clientId, String status) {
+        SwingUtilities.invokeLater(() -> {
+            UserListItem item = userItemsMap.get(clientId);
+            if (item != null) {
+                if ("muted".equals(status)) {
+                    item.setTextColor(Color.GRAY); // Set the text color to gray
+                } else {
+                    item.setTextColor(Color.BLACK); // Set the text color to black
+                }
+                userListArea.revalidate();
+                userListArea.repaint();
+            }
+        });
+    }
+
+    public void highlightUser(long clientId) {
+        SwingUtilities.invokeLater(() -> {
+            if (highlightedUserId != -1) {
+                UserListItem previousItem = userItemsMap.get(highlightedUserId);
+                if (previousItem != null) {
+                    previousItem.setBackground(Color.WHITE); // Reset the background color
+                }
+            }
+            UserListItem currentItem = userItemsMap.get(clientId);
+            if (currentItem != null) {
+                currentItem.setBackground(Color.YELLOW); // Highlight the current user
+                highlightedUserId = clientId; 
+            }
             userListArea.revalidate();
             userListArea.repaint();
         });

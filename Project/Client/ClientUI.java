@@ -1,4 +1,4 @@
-package Project.Client;
+package Project.Client; 
 
 
 import java.awt.BorderLayout;
@@ -12,16 +12,18 @@ import java.awt.event.WindowAdapter;
 
 
 import java.awt.event.WindowEvent;
-
-
-
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
+import javax.swing.SwingUtilities; 
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 
 
@@ -35,6 +37,7 @@ import Project.Client.Views.ConnectionPanel;
 import Project.Client.Views.Menu;
 import Project.Client.Views.RoomsPanel;
 import Project.Client.Views.UserDetailsPanel;
+import Project.Client.Views.UserListPanel; //added today 7-22-24
 import Project.Common.LoggerUtil;
 
 
@@ -55,6 +58,7 @@ public class ClientUI extends JFrame implements IConnectionEvents, IMessageEvent
     private ChatPanel chatPanel;
     private RoomsPanel roomsPanel;
     private JLabel roomLabel = new JLabel();
+    private UserListPanel userListPanel;
 
     {
         // Note: Moved from Client as this file is the entry point now
@@ -81,8 +85,9 @@ public class ClientUI extends JFrame implements IConnectionEvents, IMessageEvent
         cardContainer.setLayout(card);
         container.add(roomLabel, BorderLayout.NORTH);
         container.add(cardContainer, BorderLayout.CENTER);
-
-
+        userListPanel = new UserListPanel(); //added 7-22-24
+        Client.INSTANCE.setUserListPanel(userListPanel);
+        add(userListPanel, BorderLayout.EAST); //added 7-22-24
         cardContainer.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -130,9 +135,27 @@ public class ClientUI extends JFrame implements IConnectionEvents, IMessageEvent
             }
         });
 
+        addExportChatMenuItem();
 
         pack(); // Resize to fit components
         setVisible(true); // Show the window
+    }
+
+    private void addExportChatMenuItem() {
+        JMenu fileMenu = new JMenu("File");                     //UCID:sa2796 Date: 7-22-24
+
+        JMenuItem exportChatMenuItem = new JMenuItem("Export Chat");
+        exportChatMenuItem.addActionListener(e -> {
+            try {
+                chatPanel.exportChatHistory();
+                JOptionPane.showMessageDialog(this, "Chat history exported successfully!", "Export Successful", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Failed to export chat history: " + ex.getMessage(), "Export Failed", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        fileMenu.add(exportChatMenuItem);
+        menu.add(fileMenu); // Assuming menu is your JMenuBar instance
     }
 
 
@@ -217,14 +240,39 @@ public class ClientUI extends JFrame implements IConnectionEvents, IMessageEvent
         }
     }
 
-    @Override
     public void onMessageReceive(long clientId, String message) {
         if (currentCard.ordinal() >= CardView.CHAT.ordinal()) {
             String clientName = Client.INSTANCE.getClientNameFromId(clientId);
             chatPanel.addText(String.format("%s[%s]: %s", clientName, clientId, message));
-           
+    
+            // Added code to update user status based on the message content
+            if (message.contains("You have muted")) {
+                // Assuming 'You have muted [targetUsername]' message format
+                String targetUsername = message.split(" ")[3];
+                long targetClientId = getClientIdFromName(targetUsername); // This function should be implemented to get client ID from name
+                System.out.println("Muting user: " + targetUsername + " with ID: " + targetClientId); //added 6:18PM 7-22-24
+                userListPanel.updateUserStatus(targetClientId, "muted");
+            } else if (message.contains("You have unmuted")) {
+                // Assuming 'You have unmuted [targetUsername]' message format
+                String targetUsername = message.split(" ")[3];
+                long targetClientId = getClientIdFromName(targetUsername); // This function should be implemented to get client ID from name
+                System.out.println("Unmuting user: " + targetUsername + " with ID: " + targetClientId); //added 6:18PM 7-22-24
+                userListPanel.updateUserStatus(targetClientId, "active");
+            }
+    
+            // Added code to highlight the user who sent the last message
+            userListPanel.highlightUser(clientId);
         }
     }
+
+    private long getClientIdFromName(String username) {
+    for (ClientData client : Client.INSTANCE.getKnownClients().values()) {
+        if (client.getClientName().equals(username)) {
+            return client.getClientId();
+        }
+    }
+    return -1; // Return an invalid ID if not found
+}
 
 
     @Override

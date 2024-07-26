@@ -30,7 +30,7 @@ public class UserDetailsPanel extends JPanel {
 
         JPanel content = new JPanel();
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBorder(new EmptyBorder(10, 10, 10, 10)); // Add padding
+        content.setBorder(new EmptyBorder(10, 10, 10, 10)); // Add padding      //UCID: sa2796 Date: 7-16-24
 
         // Add username input field
         JLabel userLabel = new JLabel("Username: ");
@@ -45,7 +45,7 @@ public class UserDetailsPanel extends JPanel {
 
         // Add Previous and Connect buttons
         JButton previousButton = new JButton("Previous");
-        previousButton.addActionListener(event -> controls.previous());
+        previousButton.addActionListener(event -> controls.previous());                     //UCID: sa2796 Date: 7-16-24
         JButton connectButton = new JButton("Connect");
         connectButton.addActionListener(event -> {
             String incomingUsername = userValue.getText().trim();
@@ -67,7 +67,7 @@ public class UserDetailsPanel extends JPanel {
         content.add(Box.createVerticalGlue()); // Push buttons to the bottom
         content.add(buttons);
 
-        // Add the content panel to the center of the BorderLayout
+        // Add the content panel to the center of the BorderLayout                  //UCID: sa2796 Date: 7-16-24
         this.add(content, BorderLayout.CENTER);
 
         // Add empty borders to the sides for spacing

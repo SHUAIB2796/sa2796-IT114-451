@@ -43,14 +43,14 @@ public class ConnectionPanel extends JPanel {
         hostError.setVisible(false); // Initially hide the error label
         content.add(hostLabel);
         content.add(hostValue);
-        content.add(hostError);
+        content.add(hostError);                                                             //UCID:sa2796 Date: 7-16-24
 
         // Add port input field
         JLabel portLabel = new JLabel("Port:");
         JTextField portValue = new JTextField("3000");
         portValue.setToolTipText("Enter the port number"); // Add tooltip
         JLabel portError = new JLabel();
-        portError.setVisible(false); // Initially hide the error label
+        portError.setVisible(false); // Initially hide the error label              //UCID:sa2796 Date: 7-16-24
         content.add(portLabel);
         content.add(portValue);
         content.add(portError);
@@ -62,7 +62,7 @@ public class ConnectionPanel extends JPanel {
             SwingUtilities.invokeLater(() -> {
                 boolean isValid = true;
                 try {
-                    port = Integer.parseInt(portValue.getText());
+                    port = Integer.parseInt(portValue.getText());                       //UCID:sa2796 Date: 7-16-24
                     portError.setVisible(false); // Hide error label if valid
                 } catch (NumberFormatException e) {
                     portError.setText("Invalid port value, must be a number");
