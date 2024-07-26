@@ -1,5 +1,11 @@
 package Project.Server;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +32,7 @@ public class ServerThread extends BaseServerThread {
     private long clientId;
     private String clientName;
     private Consumer<ServerThread> onInitializationComplete; // callback to inform when this object is ready
+    private Set<String> muteList = new HashSet<>();
 
     /**
      * Wraps the Socket connection and takes a Server reference and a callback
@@ -43,7 +50,7 @@ public class ServerThread extends BaseServerThread {
         this.client = myClient;
         this.clientId = ServerThread.DEFAULT_CLIENT_ID;// this is updated later by the server
         this.onInitializationComplete = onInitializationComplete;
-
+        loadMuteList();
     }
 
     public void setClientName(String name) {
@@ -52,6 +59,11 @@ public class ServerThread extends BaseServerThread {
         }
         this.clientName = name;
         onInitialized();
+    }
+
+    public void setClientId(long clientId) {
+        this.clientId = clientId;
+        saveClientId();
     }
 
     public String getClientName() {
@@ -75,6 +87,7 @@ public class ServerThread extends BaseServerThread {
 
     @Override
     protected void onInitialized() {
+        loadMuteList();
         onInitializationComplete.accept(this); // Notify server that initialization is complete
     }
 
@@ -91,6 +104,7 @@ public class ServerThread extends BaseServerThread {
 
     @Override
     protected void disconnect() {
+        saveMuteList();
         // sendDisconnect(clientId, clientName);
         super.disconnect();
     }
@@ -108,7 +122,7 @@ public class ServerThread extends BaseServerThread {
                 if (payload.isPrivate()) {
                     currentRoom.handlePrivateMessage(this, payload);
                 } else {
-                    currentRoom.sendMessage(this, payload.getMessage());
+                    currentRoom.sendMessage(this, payload.getMessage());        //UCID: sa2796 Date: 7-16-24
                 }
                     break;
                 case ROOM_CREATE:
@@ -141,7 +155,7 @@ public class ServerThread extends BaseServerThread {
                     currentRoom.handleMute(this, payload);
                     break;
                 case UNMUTE:
-                    currentRoom.handleUnmute(this, payload);
+                    currentRoom.handleUnmute(this, payload);        //UCID: sa2796 Date: 7-16-24
                     break;
                 default:
                     break;
@@ -152,21 +166,66 @@ public class ServerThread extends BaseServerThread {
         }
     }
 
-    private Set<Long> muteList = new HashSet<>();
-
-    public void addToMuteList(long clientId) {
-        muteList.add(clientId); 
+    private void saveClientId() {
+        File file = new File(getClientName() + "_clientId.txt");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            writer.write(Long.toString(clientId));
+        } catch (IOException e) {
+            LoggerUtil.INSTANCE.severe("Error saving client ID for client: " + getClientName(), e);
+        }
     }
 
-    public void removeFromMuteList(long clientId) {
-        muteList.remove(clientId);
+    private void loadMuteList() {
+        File file = new File(getClientName() + "_mutelist.txt");
+        if (file.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    muteList.add(line);
+                }
+                LoggerUtil.INSTANCE.info("Mute list loaded for client: " + getClientName());
+            } catch (IOException e) {
+                LoggerUtil.INSTANCE.severe("Error loading mute list for client: " + getClientName(), e);
+            }
+        }
     }
+    
 
-    public boolean isMuted(long clientId) {
-        return muteList.contains(clientId);
+    private void saveMuteList() {
+        File file = new File(getClientName() + "_mutelist.txt");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for (String mutedUsername : muteList) {
+                writer.write(mutedUsername);
+                writer.newLine();
+            }
+            LoggerUtil.INSTANCE.info("Mute list saved for client: " + getClientName());
+        } catch (IOException e) {
+            LoggerUtil.INSTANCE.severe("Error saving mute list for client: " + getClientName(), e);
+        }
     }
+    
+    
 
     
+
+
+    public void addToMuteList(String username) {
+        muteList.add(username);
+        saveMuteList();
+    }
+
+    public void removeFromMuteList(String username) {    //UCID: sa2796 Date: 7-16-24
+        muteList.remove(username);
+        saveMuteList();
+    }
+
+    public boolean isMuted(String username) {
+        return muteList.contains(username);
+    }
+
+    public Set<String> getMuteList() {
+        return muteList;
+    }
 
     // send methods to pass data back to the Client
 
@@ -207,7 +266,7 @@ public class ServerThread extends BaseServerThread {
         p.setClientId(senderId);
         p.setMessage(message);
         p.setPayloadType(PayloadType.MESSAGE);
-        p.setPrivate(isPrivate);
+        p.setPrivate(isPrivate);                //UCID: sa2796 Date: 7-16-24
         return send(p);
     }
 

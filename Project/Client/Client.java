@@ -16,6 +16,8 @@ import Project.Client.Interfaces.IConnectionEvents;
 import Project.Client.Interfaces.IClientEvents;
 import Project.Client.Interfaces.IMessageEvents;
 import Project.Client.Interfaces.IRoomEvents;
+import Project.Client.Views.UserListPanel;
+//added today 7-22-24
 import Project.Common.ConnectionPayload;
 import Project.Common.LoggerUtil;
 import Project.Common.Payload;
@@ -54,6 +56,7 @@ public enum Client {
     private volatile boolean isRunning = true; // volatile for thread-safe visibility
     private ConcurrentHashMap<Long, ClientData> knownClients = new ConcurrentHashMap<>();
     private ClientData myData;
+    private UserListPanel userListPanel; //added 7-22-24
 
     // constants (used to reduce potential types when using them in code)
     private final String COMMAND_CHARACTER = "/";
@@ -72,6 +75,29 @@ public enum Client {
     private Client() {
         LoggerUtil.INSTANCE.info("Client Created");
         myData = new ClientData();
+    }
+
+    public ConcurrentHashMap<Long, ClientData> getKnownClients() {
+        return knownClients;
+    }
+
+    // Setter for userListPanel
+    public void setUserListPanel(UserListPanel userListPanel) {
+        this.userListPanel = userListPanel;
+    }
+
+    // Method to update user status
+    public void updateUserStatus(long clientId, String status) {
+        if (userListPanel != null) {
+            userListPanel.updateUserStatus(clientId, status);
+        }
+    }
+
+    // Method to highlight user
+    public void highlightUser(long clientId) {
+        if (userListPanel != null) {
+            userListPanel.highlightUser(clientId);
+        }
     }
 
     public boolean isConnected() {
@@ -114,7 +140,7 @@ public enum Client {
     /**
      * Takes an ip address and a port to attempt a socket connection to a server.
      * 
-     * @param address
+     * @param address 
      * @param port
      * @param username
      * @param callback (for triggering UI events)
@@ -202,7 +228,7 @@ public enum Client {
         else if (text.startsWith("@")) {  // Handle private message
             int spaceIndex = text.indexOf(' ');
             if (spaceIndex > 0) {
-                String targetUsername = text.substring(1, spaceIndex);
+                String targetUsername = text.substring(1, spaceIndex);      //UCID: sa2796 Date: 7-16-24
                 String message = text.substring(spaceIndex + 1);
                 sendPrivateMessage(targetUsername, message);
                 return true;
@@ -255,7 +281,7 @@ public enum Client {
             return true;
 
         } else if (text.startsWith("/mute ")) {
-            String targetUsername = text.replace("/mute ", "").trim();
+            String targetUsername = text.replace("/mute ", "").trim();  //UCID:sa2796 Date: 7-16-24
             sendMuteCommand(targetUsername);
             return true;
         } else if (text.startsWith("/unmute ")) {
@@ -312,10 +338,13 @@ public enum Client {
 
     
     // send methods to pass data to the ServerThread
+    
+
+    
 
 
-    private void sendMuteCommand(String targetUsername) throws IOException {
-        Payload p = new Payload();
+    private void sendMuteCommand(String targetUsername) throws IOException {    //UCID:sa2796 Date: 7-16-24
+        Payload p = new Payload();  
         p.setPayloadType(PayloadType.MUTE);
         p.setTargetUsername(targetUsername);
         send(p);
@@ -334,7 +363,7 @@ public enum Client {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.MESSAGE);
         p.setMessage(message);
-        p.setTargetUsername(targetUsername);
+        p.setTargetUsername(targetUsername);                                //UCID: sa2796 Date: 7-16-24
         p.setPrivate(true);
         send(p);
     }
@@ -658,8 +687,35 @@ public enum Client {
         String name = knownClients.containsKey(clientId) ? knownClients.get(clientId).getClientName() : "Room";
         System.out.println(TextFX.colorize(String.format("%s: %s", name, message), Color.BLUE));
         // invoke onMessageReceive callback
-        ((IMessageEvents) events).onMessageReceive(clientId, message);
+        ((IMessageEvents) events).onMessageReceive(clientId, message);  //added 7-22-24
+
+        if (message.contains("You have muted")) {
+            // Assuming "You have muted [targetUsername]" message format
+            String targetUsername = message.split(" ")[3];
+            long targetClientId = getClientIdFromName(targetUsername);
+            userListPanel.updateUserStatus(targetClientId, "muted");
+        } else if (message.contains("You have unmuted")) {
+            // Assuming "You have unmuted [targetUsername]" message format
+            String targetUsername = message.split(" ")[3];
+            long targetClientId = getClientIdFromName(targetUsername);
+            userListPanel.updateUserStatus(targetClientId, "active");
+        }
+
+        userListPanel.highlightUser(clientId);
     }
+
+    private long getClientIdFromName(String username) {
+        for (ClientData client : knownClients.values()) {
+            if (client.getClientName().equals(username)) {
+                return client.getClientId();
+            }
+        }
+        return -1; // Return an invalid ID if not found
+    }
+
+    
+
+
 
     private void processClientSync(long clientId, String clientName) {
 

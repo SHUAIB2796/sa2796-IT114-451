@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 
+
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
@@ -51,5 +52,8 @@ public class UserListItem extends JPanel {
 
     public String getClientName() {
         return textContainer.getText();
+    }
+    public void setTextColor(Color color) {
+        textContainer.setForeground(color);
     }
 }

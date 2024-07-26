@@ -1,14 +1,24 @@
 package Project.Server;
 
 import java.util.concurrent.ConcurrentHashMap;
+
+import Project.Common.ConnectionPayload;
 import Project.Common.FlipPayload;
 import Project.Common.RollPayload;
 
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import Project.Common.LoggerUtil;
 import Project.Common.Payload;
+import Project.Common.PayloadType;
 
 
 
@@ -17,7 +27,7 @@ public class Room implements AutoCloseable{
     private String name;// unique name of the Room
     protected volatile boolean isRunning = false;
     private ConcurrentHashMap<Long, ServerThread> clientsInRoom = new ConcurrentHashMap<Long, ServerThread>();
-    private Random random = new Random();
+
     private String targetUsername;
 
     public final static String LOBBY = "lobby";
@@ -166,6 +176,7 @@ public class Room implements AutoCloseable{
         }
         clientsInRoom.put(client.getClientId(), client);
         client.setCurrentRoom(this);
+        loadMuteList(client);
 
         // notify clients of someone joining
         sendRoomStatus(client.getClientId(), client.getClientName(), true);
@@ -207,6 +218,7 @@ public class Room implements AutoCloseable{
         long id = client.getClientId();
         sendDisconnect(client);
         client.disconnect();
+        saveMuteList(client);
         // removedClient(client); // <-- use this just for normal room leaving
         clientsInRoom.remove(client.getClientId());
         LoggerUtil.INSTANCE.fine("Clients remaining in Room: " + clientsInRoom.size());
@@ -348,7 +360,7 @@ public class Room implements AutoCloseable{
         // it's one way we can safely remove items during iteration
         info(String.format("sending message to %s recipients: %s", getName(), clientsInRoom.size(), messageToSend[0]));
         clientsInRoom.values().removeIf(client -> {
-            if (client.isMuted(senderId)) {
+            if (client.isMuted(sender.getClientName())) {
                 info(String.format("Message from %s to %s was skipped due to mute.", sender.getClientName(), client.getClientName()));     //UCID: sa2796 Date: 7-16-24
                 return false;
             }
@@ -361,6 +373,7 @@ public class Room implements AutoCloseable{
                 disconnect(client);
         }
         return failedToSend;
+        
     });
     }
 
@@ -387,31 +400,27 @@ public class Room implements AutoCloseable{
     }
 
     
-                                                                             //UCID: sa2796 Date: 7-16-24
+    //UCID: sa2796 Date: 7-16-24
     protected synchronized void handleFlip(ServerThread sender, FlipPayload flipPayload) {
-        String result = random.nextBoolean() ? "heads" : "tails";
-        String message = String.format("%s flipped a coin and got %s", sender.getClientName(), result);
-        sendMessage(null, message);
+        Random random = new Random();
+        boolean result = random.nextBoolean();
+        String message = String.format("%s flipped a coin and got %s", sender.getClientName(), result ? "heads" : "tails");
+        sendMessage(sender, message);
     }
     
 
     
   
-    protected synchronized void handleRoll(ServerThread sender, RollPayload rollPayload) {              //UCID: sa2796 Date: 7-16-24
-        int Dicenumber = rollPayload.getDicenumber();
-        int Sidesnumber = rollPayload.getSidesnumber();
-        StringBuilder resultMessage = new StringBuilder(String.format("%s rolled %dd%d and got", sender.getClientName(), Dicenumber, Sidesnumber));      
-        int total = 0;
-        for (int i = 0; i < Dicenumber; i++) {
-            int rollResult = random.nextInt(Sidesnumber) + 1;
-            total += rollResult;
-            resultMessage.append(" ").append(rollResult);
+    protected synchronized void handleRoll(ServerThread sender, RollPayload rollPayload) {
+        int diceNumber = rollPayload.getDiceNumber();
+        int sidesNumber = rollPayload.getSidesNumber();
+        StringBuilder resultMessage = new StringBuilder(String.format("%s rolled %d dice with %d sides and got: ", sender.getClientName(), diceNumber, sidesNumber));
+        Random random = new Random();
+        for (int i = 0; i < diceNumber; i++) {
+            resultMessage.append(random.nextInt(sidesNumber) + 1).append(" ");
         }
-
-        resultMessage.append(" (total: ").append(total).append(")");
-        sendMessage(null, resultMessage.toString());
+        sendMessage(sender, resultMessage.toString().trim());
     }
-
 
     // receive data from ServerThread
     
@@ -437,19 +446,55 @@ public class Room implements AutoCloseable{
         disconnect(sender);
     }
 
+    private void loadMuteList(ServerThread client) {
+        File file = new File(client.getClientName() + "_mutelist.txt");
+        if (file.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    client.addToMuteList(line);
+                }
+                LoggerUtil.INSTANCE.info("Mute list loaded from " + file.getName());
+            } catch (IOException e) {
+                LoggerUtil.INSTANCE.severe("Error loading mute list for client: " + client.getClientName(), e);
+            }
+        }
+    }
+    private void saveMuteList(ServerThread client) {
+        File file = new File(client.getClientName() + "_mutelist.txt");
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+            for (String mutedUsername : client.getMuteList()) {
+                writer.write(mutedUsername);
+                writer.newLine();
+            }
+            LoggerUtil.INSTANCE.info("Mute list saved for client: " + client.getClientName());
+        } catch (IOException e) {
+            LoggerUtil.INSTANCE.severe("Error saving mute list for client: " + client.getClientName(), e);
+        }
+    }
+
+   
+    
+        //UCID: sa2796 Date: 7-16-24
     public void handleMute(ServerThread sender, Payload payload) {
-        String targetUsername = payload.getTargetUsername();
-    
-        ServerThread targetClient = clientsInRoom.values().stream()
-            .filter(client -> client.getClientName().equalsIgnoreCase(targetUsername))
-            .findFirst()
-            .orElse(null);
-    
+    String targetUsername = payload.getTargetUsername();
+
+    ServerThread targetClient = clientsInRoom.values().stream()
+        .filter(client -> client.getClientName().equalsIgnoreCase(targetUsername))
+        .findFirst()
+        .orElse(null);
+
         if (targetClient != null) {
-            sender.addToMuteList(targetClient.getClientId());
-            sender.sendMessage(sender.getClientId(), "You have muted " + targetUsername, false);
+            if (!sender.isMuted(targetClient.getClientName())) {
+                sender.addToMuteList(targetClient.getClientName());
+                saveMuteList(sender);
+                sender.sendMessage(sender.getClientId(), "You have muted " + targetUsername, false);
+                targetClient.sendMessage(targetClient.getClientId(), "You have been muted by " + sender.getClientName(), false);
+            } else {
+                sender.sendMessage(sender.getClientId(), targetUsername + " is already muted.", false);
+            }
         } else {
-            sender.sendMessage(sender.getClientId(), "User " + targetUsername + " not found.", false);      //UCID: sa2796 Date: 7-16-24
+            sender.sendMessage(sender.getClientId(), "User " + targetUsername + " not found.", false);
         }
     }
 
@@ -461,14 +506,19 @@ public class Room implements AutoCloseable{
             .findFirst()
             .orElse(null);
     
-        if (targetClient != null) {
-            sender.removeFromMuteList(targetClient.getClientId());
-            sender.sendMessage(sender.getClientId(), "You have unmuted " + targetUsername, false);
-        } else {
-            sender.sendMessage(sender.getClientId(), "User " + targetUsername + " not found.", false);
+            if (targetClient != null) {
+                if (sender.isMuted(targetClient.getClientName())) {
+                    sender.removeFromMuteList(targetClient.getClientName());
+                    saveMuteList(sender);
+                    sender.sendMessage(sender.getClientId(), "You have unmuted " + targetUsername, false);
+                    targetClient.sendMessage(targetClient.getClientId(), "You have been unmuted by " + sender.getClientName(), false);
+                } else {
+                    sender.sendMessage(sender.getClientId(), targetUsername + " is not muted.", false);
+                }
+            } else {
+                sender.sendMessage(sender.getClientId(), "User " + targetUsername + " not found.", false);
+            }
         }
-    }
-
 
 
     // end receive data from ServerThread
